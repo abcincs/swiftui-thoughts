@@ -9,7 +9,7 @@ import SwiftUI
 
 enum GameLevel: Int {
     case start = 0
-    case one, two, three
+    case one, two
     case final
 }
 
@@ -19,16 +19,17 @@ class GameStore: ObservableObject {
 
     @Published private(set) var currentLevel = GameLevel.start
     @Published private(set) var selectedDigitChoice: Int = suggestedDigitsChoice[0]
+    @Published private(set) var guessGameDigits: String = ""
 
     @Published private(set) var selectedGameNumber: Int = -1
-    @Published private(set) var gameNumberGuesses: [Int] = []
+    @Published private(set) var gameNumberGuesses: [String] = []
+    @Published var alertItem: (status: Bool, message: String) = (false, "")
 
-
-    public func gameNumberBinding() -> Binding<Int> {
+    public func gameNumberBinding() -> Binding<String> {
         Binding {
-            self.selectedGameNumber
+            self.guessGameDigits
         } set: { value in
-            self.selectedGameNumber = value
+            self.guessGameDigits = value
         }
     }
 
@@ -38,37 +39,40 @@ class GameStore: ObservableObject {
         self.selectedDigitChoice = digit
     }
 
+    public func deleteLastDigit() {
+        self.guessGameDigits.removeLast()
+    }
+
 
     private func setGameLevel(_ newLevel: GameLevel) {
         self.currentLevel = newLevel
     }
 
     public func startGame() {
-        generateGameNumber()
+        setGameNumber()
         setGameLevel(.one)
     }
 
     public func restartGame() {
-        selectedDigitChoice = Self.suggestedDigitsChoice[0]
-        selectedGameNumber = -1
-        gameNumberGuesses = []
-        currentLevel = .start
-    }
-
-    // We can also throw if selected digit is not supported
-    private func generateGameNumberRange() -> ClosedRange<Int> {
-        switch selectedDigitChoice {
-        case 4: return (10_000...99_999)
-        case 5: return (100_000...999_999)
-        case 6: return (1_000_000...9_99_999)
-        case 7: return (10_000_000...99_999_999)
-        case 8: return (100_000_000...9_999_999)
-        default: fatalError("Invalid Choice")
+        withAnimation {
+            selectedDigitChoice = Self.suggestedDigitsChoice[0]
+            guessGameDigits = ""
+            selectedGameNumber = -1
+            gameNumberGuesses = []
+            currentLevel = .start
         }
     }
 
+    // We can also throw if selected digit is not supported
+    func generateGameNumberRange() -> ClosedRange<Int> {
+        let lowerBound: Int = Int(pow(Double(10), Double(selectedDigitChoice)))
+        let upperBound: Int = Int(pow(Double(10), Double(selectedDigitChoice+1))) - 1
 
-    func generateGameNumber() {
+        return lowerBound...upperBound
+    }
+
+
+    private func setGameNumber() {
         let gameNumberRange = generateGameNumberRange()
         selectedGameNumber = gameNumberRange.randomElement()!
     }
@@ -77,11 +81,35 @@ class GameStore: ObservableObject {
     func goToNextLevel() {
         let thisLevel = currentLevel.rawValue
 
-        if let nextLevel = GameLevel(rawValue: thisLevel) {
+        if let nextLevel = GameLevel(rawValue: thisLevel+1) {
             self.currentLevel = nextLevel
         } else {
             print("There is no next level at the moment, You are done with the game\nStart a new one.")
         }
+    }
+
+    func isReadyForSubmission() -> Bool {
+        guessGameDigits.count == String(selectedGameNumber).count
+    }
+
+    func submit() {
+        gameNumberGuesses.append(guessGameDigits)
+
+        let result = validateAnswer()
+
+        alertItem = (result.success, result.message)
+    }
+
+    private func validateAnswer() -> (success: Bool, message: String) {
+        guard guessGameDigits.count == String(selectedGameNumber).count else {
+            return (true, "You have not finished the game yet!.")
+        }
+
+        guard guessGameDigits == String(selectedGameNumber) else {
+            return (true, "You guessed it wrong dear, the correct one was \(selectedGameNumber)!.")
+        }
+
+        return (true, "Congrats!, You guessed it right!.")
     }
 
 }
@@ -101,11 +129,15 @@ struct ContentView: View {
                 .fontWeight(.semibold)
 
             VStack {
-
                 viewForCurrentLevel()
             }
             .frame(maxHeight: .infinity)
         }
+        .alert(isPresented: $gameStore.alertItem.status, content: {
+            Alert(title: Text("MATHEMATIZE"),
+                  message: Text(gameStore.alertItem.message),
+                  dismissButton: .default(Text("Got it!"), action: gameStore.restartGame))
+        })
         .onAppear(perform: logic)
 
     }
@@ -126,8 +158,6 @@ struct ContentView: View {
             level1View
         case .two:
             level2View
-        case .three:
-            level3View
         case .final:
             finalView
         }
@@ -172,8 +202,10 @@ struct ContentView: View {
                 .font(.system(.title, design: .rounded))
                 .foregroundColor(.green)
 
-            Button(action: gameStore.startGame) {
-                Text("Start")
+            Button(action:{
+                gameStore.goToNextLevel()
+            }) {
+                Text("Continue")
                     .foregroundColor(.white)
                     .frame(width: 120, height: 40)
                     .background(Color.blue)
@@ -183,29 +215,59 @@ struct ContentView: View {
     }
 
     private var level2View: some View {
-        HStack {
-            if !(gameStore.selectedGameNumber == -1) {
-                ForEach(String(gameStore.selectedGameNumber).map({ $0 }), id:\.self) { digit in
-                    Text(String(digit))
-                        .font(.system(.largeTitle, design: .rounded))
-                        .frame(width: 60, height: 60)
-                        .background(.regularMaterial)
+        VStack(spacing: 25) {
+
+            HStack {
+                if !(gameStore.selectedGameNumber == -1) {
+                    ForEach(0..<String(gameStore.selectedGameNumber).count, id:\.self) { i in
+                        let guessString =  Array(String(gameStore.guessGameDigits))
+                        let isContained = i < guessString.count
+                        Text(isContained ? String(guessString[i]) : "")
+                            .font(.system(.largeTitle, design: .rounded))
+                            .frame(maxWidth: 60)
+                            .frame(height: 60)
+                            .background(.regularMaterial)
+                            .cornerRadius(10)
+                        //                    .scaleEffect(digit==gameStore.selectedDigitChoice ? 1 : 0.8)
+                        //                    .overlay(
+                        //                        RoundedRectangle(cornerRadius: 10)
+                        //                            .stroke(digit==gameStore.selectedDigitChoice ? Color.green : Color.clear,
+                        //                                    lineWidth: 0.5)
+                        //                    )
+                            .contentShape(Rectangle())
+                            .animation(.linear, value: gameStore.selectedGameNumber)
+                    }
+
+                    if !(gameStore.guessGameDigits.isEmpty) {
+                        Text("X")
+                            .font(.system(.largeTitle, design: .rounded))
+                            .frame(maxWidth: 60)
+                            .frame(height: 60)
+                            .background(.regularMaterial)
+                            .cornerRadius(10)
+                            .foregroundColor(.red)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                gameStore.deleteLastDigit()
+                            }
+                    }
+                }
+            }
+
+            PinView(inputNumber: gameStore.gameNumberBinding().animation())
+
+            if gameStore.isReadyForSubmission() {
+                Button(action: gameStore.submit) {
+                    Text("Submit")
+                        .foregroundColor(.white)
+                        .frame(width: 120, height: 40)
+                        .background(Color.blue)
                         .cornerRadius(10)
-                    //                    .scaleEffect(digit==gameStore.selectedDigitChoice ? 1 : 0.8)
-                    //                    .overlay(
-                    //                        RoundedRectangle(cornerRadius: 10)
-                    //                            .stroke(digit==gameStore.selectedDigitChoice ? Color.green : Color.clear,
-                    //                                    lineWidth: 0.5)
-                    //                    )
-                        .contentShape(Rectangle())
-                        .animation(.linear, value: gameStore.selectedGameNumber)
                 }
             }
         }
-    }
+        .padding(.horizontal)
 
-    private var level3View: some View {
-        PinView(inputNumber: gameStore.gameNumberBinding())
     }
 
     private var finalView: some View {
@@ -225,7 +287,6 @@ struct ContentView: View {
                     .background(Color.blue)
                     .cornerRadius(10)
             }
-
         }
 
     }
@@ -238,8 +299,7 @@ struct ContentView_Previews: PreviewProvider {
 }
 
 struct PinView: View {
-    @Binding var inputNumber: Int
-    @State private var inputString: String = ""
+    @Binding var inputNumber: String
 
     private let btnSize: CGFloat = 70
     private let buttons: [String] = ["1","2","3","4","5","6","7","8","9","","0"]
@@ -258,33 +318,10 @@ struct PinView: View {
 
             }
         }
-        .padding(.horizontal)
-        .onAppear() {
-            inputString = String(inputNumber)
-        }
     }
 
     private func addKey(_ value: String) {
-        if value == "X" {
-            if !(inputNumber == -1) {
-                var numberString = String(inputNumber)
-                numberString.removeLast()
-                let numberInt = Int(numberString) ?? -1
-                inputNumber = numberInt
-            }
-        } else {
-            let numberString = String(inputNumber) + value
-            let numberInt = Int(numberString) ?? -1
-            inputNumber = numberInt
-            inputString = String(numberString)
-        }
-    }
-}
-
-extension Int {
-    var stringBind: String {
-        get { String(self) }
-        set(value) { self = Int(value) ?? 0 }
+        inputNumber += value
     }
 }
 
