@@ -165,8 +165,10 @@ struct ContentView: View {
     }
 
     private var startView: some View {
-        VStack {
+        VStack(spacing: 30) {
             Text("Choose the number of digits")
+                .font(.system(.title, design: .rounded))
+
             HStack {
                 ForEach(GameStore.suggestedDigitsChoice, id: \.self) { digit in
                     Text(String(digit))
@@ -199,9 +201,13 @@ struct ContentView: View {
 
     private var level1View: some View {
         VStack {
-            Text("Your number is \(gameStore.selectedGameNumber.description)")
-                .font(.system(.title, design: .rounded))
-                .foregroundColor(.green)
+            Group {
+                Text("The number to guess is")
+                    .font(.system(.title, design: .rounded))
+                Text(gameStore.selectedGameNumber.description)
+                    .font(.system(.largeTitle, design: .rounded).weight(.black))
+            }
+            .foregroundColor(.green)
 
             Button(action:{
                 gameStore.goToNextLevel()
