@@ -29,6 +29,7 @@ class GameStore: ObservableObject {
         Binding {
             self.guessGameDigits
         } set: { value in
+            guard value.count <=  String(self.selectedGameNumber).count else { return }
             self.guessGameDigits = value
         }
     }
