@@ -11,6 +11,10 @@
 		CB244D0F284559B300F2DA4D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB244D0E284559B300F2DA4D /* ContentView.swift */; };
 		CB244D11284559B400F2DA4D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB244D10284559B400F2DA4D /* Assets.xcassets */; };
 		CB244D14284559B400F2DA4D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB244D13284559B400F2DA4D /* Preview Assets.xcassets */; };
+		CBC403F028BA1D3400A7056C /* GameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC403EF28BA1D3400A7056C /* GameStore.swift */; };
+		CBC403F228BA1D3900A7056C /* GameLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC403F128BA1D3900A7056C /* GameLevel.swift */; };
+		CBC403F428BA1DDF00A7056C /* PinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC403F328BA1DDF00A7056C /* PinView.swift */; };
+		CBC403F628BA1DEC00A7056C /* CircleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC403F528BA1DEC00A7056C /* CircleButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +23,10 @@
 		CB244D0E284559B300F2DA4D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CB244D10284559B400F2DA4D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CB244D13284559B400F2DA4D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		CBC403EF28BA1D3400A7056C /* GameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameStore.swift; sourceTree = "<group>"; };
+		CBC403F128BA1D3900A7056C /* GameLevel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameLevel.swift; sourceTree = "<group>"; };
+		CBC403F328BA1DDF00A7056C /* PinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinView.swift; sourceTree = "<group>"; };
+		CBC403F528BA1DEC00A7056C /* CircleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +61,10 @@
 			children = (
 				CB244D0C284559B200F2DA4D /* MathematizeApp.swift */,
 				CB244D0E284559B300F2DA4D /* ContentView.swift */,
+				CBC403F328BA1DDF00A7056C /* PinView.swift */,
+				CBC403F528BA1DEC00A7056C /* CircleButton.swift */,
+				CBC403EF28BA1D3400A7056C /* GameStore.swift */,
+				CBC403F128BA1D3900A7056C /* GameLevel.swift */,
 				CB244D10284559B400F2DA4D /* Assets.xcassets */,
 				CB244D12284559B400F2DA4D /* Preview Content */,
 			);
@@ -137,7 +149,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBC403F428BA1DDF00A7056C /* PinView.swift in Sources */,
+				CBC403F228BA1D3900A7056C /* GameLevel.swift in Sources */,
 				CB244D0F284559B300F2DA4D /* ContentView.swift in Sources */,
+				CBC403F628BA1DEC00A7056C /* CircleButton.swift in Sources */,
+				CBC403F028BA1D3400A7056C /* GameStore.swift in Sources */,
 				CB244D0D284559B200F2DA4D /* MathematizeApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
